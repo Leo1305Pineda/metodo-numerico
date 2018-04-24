@@ -1,7 +1,11 @@
 #-------------------Valores de Entrada-----------------------
 
-A=rbind(c(3,1,1),c(1,-4,1),c(1,1,-3))
-b=c(1,2,1)
+# Operacion con pivoteo parcial
+A=rbind(c(0.003000,59.14),c(5.291,-4))
+b=c(59.17,46.78)
+
+#A=rbind(c(3,1,1),c(1,-4,1),c(1,1,-3))
+#b=c(1,2,1)
 
 #A = rbind(c(1,1,0,3), c(2,1,-1,1),c(3,-1,-1,2), c(-1,2,3,-1))
 #b = c(4,1,-3,4)
@@ -10,6 +14,12 @@ b=c(1,2,1)
 
 Dominant<-function(A)
 {
+	# Teorema. 11. Una matriz A estrictamente dominante en sentido diagonal 
+	# es no singular. Más aún, en est caso podemos realizar la eliminación 
+	# gaussiana de cualquier sistema lineal de la forma Ax = b para obtener 
+	# su solución única sin intercambios de filas ni columnas, y los cálculos 
+	# son estables respecto al crecimiento de los errores de redondeo.
+	
 	print('La Matriz es dominante?')
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
@@ -28,16 +38,20 @@ Dominant<-function(A)
 elimGauss_Adelante_SustAtras<-function(A,b)
 {
 	print('Eliminacion gaussiana hacia adelante con sustitucion hacia atras')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
 	{	
 		MA=cbind(A,b)							# Matriz Ampliada
 		print(MA)								# Imprimir la Matriz Ampliada
+		numeroOperaciones(A)					# Imprime el numero de operaciones a realizar
 		na=dim(MA)[2]							# Numero de columna de la matriz Ampliada
 		for (k in 1:(fila-1))					# Repetir Miestra 
-			for (i in (k+1):fila)				# 
+			for (i in (k+1):fila)				
  			{ 
+ 				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor=MA[i,k]/MA[k,k]
  				MA[i,k:na]=MA[i,k:na]-factor*MA[k,k:na]
 		  	}
@@ -55,17 +69,21 @@ elimGauss_Adelante_SustAtras<-function(A,b)
 elimGauss_Atras_SustAdelante <- function(A,b)
 {
 	print('Eliminacion Gaussiana hacia atras sustitucion hacia adelante')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
 	{
 		MA=cbind(A,b)							# Matriz Ampliada
 		print(MA)								# Imprimir la Matriz Ampliada
+		numeroOperaciones(A)					# Imprime el numero de operaciones a realizar
 		na=dim(MA)[2]							# Numero de columna de la matriz Ampliada
 		for(k in fila:2)
 		{
 			for(i in (k-1):1)
 			{
+				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor=MA[i,k]/MA[k,k]
 				MA[i,na:1]=MA[i,na:1]-factor*MA[k,na:1]	
 			}
@@ -91,11 +109,13 @@ pivoteoParcialAtras<- function(MA,n,k)
 	}
 	if((mayor) != k)
 	{
-		print(MA[mayor,])
+		print(c('Fila a intercambiar: ',MA[mayor,]))
 		pivo=MA[k,]
-		MA[k,]=MA[mayor,]
-		MA[mayor,]=pivo
+		MA[k,]=MA[mayor,]						# Intercambiamos Fila k por mayor
+		MA[mayor,]=pivo 						# Intercambiamos Fila
 	}
+	print('Matriz resultante')
+	print(MA)
 	return (MA)
 }
 
@@ -104,6 +124,7 @@ pivoteoParcialAtras<- function(MA,n,k)
 elimGPivoteoParcialAtras <- function(A,b)
 {
 	print('ElimGaus hacia atras con pivoteo Parcial')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
@@ -116,6 +137,8 @@ elimGPivoteoParcialAtras <- function(A,b)
 	 		MA <- pivoteoParcialAtras(MA,fila,k)
 			for(i in (k-1):1)
 			{
+				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor = MA[i,k]/MA[k,k]
 				MA[i,na:1]=MA[i,na:1]-factor*MA[k,na:1]	
 			}
@@ -154,6 +177,7 @@ pivoteoParcialAdelante<- function(MA,n,k)
 elimGPivoteoParcialAdelante <- function(A,b)
 {
 	print('ElimGaus Hacia adelante con Pivoteo Parcial')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
@@ -166,6 +190,8 @@ elimGPivoteoParcialAdelante <- function(A,b)
 			MA=pivoteoParcialAdelante(MA,fila,k)
 			for(i in (k+1):fila)
 			{
+				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor = MA[i,k]/MA[k,k]
 				MA[i,k:na]=MA[i,k:na]-factor*MA[k,k:na]		
 			}
@@ -215,6 +241,7 @@ pivoteoEscalonadoAdelante <- function(MA,n,k,s)
 elimGPivoteoEscalonadolAdelante <- function(A,b)
 {
 	print('ElimGaus Hacia Adelante con Pivoteo Escalonado')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
@@ -229,6 +256,8 @@ elimGPivoteoEscalonadolAdelante <- function(A,b)
 		 	MA=pivoteoEscalonadoAdelante(MA,fila,k,s)
 			for(i in (k+1):fila)
 			{
+				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor=MA[i,k]/MA[k,k]
 				MA[i,k:na]=MA[i,k:na]-factor*MA[k,k:na]
 			}
@@ -250,7 +279,11 @@ pivoteoEscalonadoAtras <- function(MA,n,k,s)
 	if((mayor) != k)
 	{
 		esca=MA[k,]
-		MA[k,]=MA[mayor+k-1,]
+		print('POLICE problema con el indice A22=0')
+		print(esca)
+		print(mayor)
+		print(k)
+		MA[k,]=MA[mayor+k-1,] ##MA[k,]=MA[mayor+k-2,] solucion
 		MA[mayor+k-1,]=esca
 	}
 	return (MA)
@@ -261,6 +294,7 @@ pivoteoEscalonadoAtras <- function(MA,n,k,s)
 elimGPivoteoEscalonadolAtras <- function(A,b)
 {
 	print('ElimGaus Hacia Adelante con Pivoteo Escalonado')
+	if (det(A)==0) return('Sistema singular')   # caso imposible de n−1 ecuaciones con n incógnitas.
 	fila = dim(A)[1]							# Numero de fila de la matriz A
 	columna = dim(A)[2]							# Numero de columna de la matriz A
 	if(fila == columna)							# Es Cuadrada
@@ -275,6 +309,8 @@ elimGPivoteoEscalonadolAtras <- function(A,b)
 		 	MA=pivoteoEscalonadoAtras(MA,fila,k,s)
 			for(i in (k-1):1)
 			{
+				if(MA[k,k]==0) 
+ 					return('Division entre cero')# Para visualizar el metodo falla
 				factor = MA[i,k]/MA[k,k]
 				MA[i,na:1]=MA[i,na:1]-factor*MA[k,na:1]	
 			}
@@ -286,7 +322,41 @@ elimGPivoteoEscalonadolAtras <- function(A,b)
 		return(x)
 	}
 	return('La matriz no es cuadrada')	
+}
+
+jacobi <- function(A,b,tol)
+{
+	print(A)
+	n=dim(A)[1]
+	Q=diag(diag(A),n,n)
+	print(Q)
+	R=(A-Q)
+	x=numeric(n)
+	iter=1
+	error=tol + 1
+	print(round(x,4))
+	while(error > tol)
+	{
+		ant=x
+		for(i in 1:n)
+		{
+			x[i]=(b[i]-sum(R[i, 1:n]*ant[1:n]))/Q[i,i]
+			print(round(x,4))
+		}
+		iter=iter + 1
+		error=round(sqrt(sum((x[1:n]-ant[1:n])^2)),3)	               
+		print(error)
+	}
 }	
+
+#------------Conteo de operaciones eliminacion gaussiana--------------------
+
+numeroOperaciones <- function(A){
+	k=1
+	n=dim(A)[1]
+	op=sum(k:n)+sum((k:(n-1))*((k+2):(n+1))+(0:(n-2)))
+	print(c('Numero de operaciones:',op))
+}
 
 #------------Metodos a ejecutar--------------------
 
